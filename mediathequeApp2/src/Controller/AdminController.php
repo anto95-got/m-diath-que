@@ -23,6 +23,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Doctrine\ORM\EntityManagerInterface;
 
 #[Route('/admin')]
@@ -226,24 +228,67 @@ class AdminController extends AbstractController
     }
 
     #[Route('/demandes/{id}/approve', name: 'admin_demandes_approve', methods: ['POST'])]
-    public function approveDemande(int $id, DemandeDocumentRepository $repo, EntityManagerInterface $em): Response
+    public function approveDemande(int $id, DemandeDocumentRepository $repo, EntityManagerInterface $em, DocumentRepository $documentRepo, MailerInterface $mailer): Response
     {
         $demande = $repo->find($id);
         if ($demande) {
             $demande->setStatutDemande('Réservé');
+
+            // If possible, find the matching document by title and mark as not available
+            try {
+                $titre = $demande->getTitreDemande();
+                $document = $documentRepo->findOneBy(['titre' => $titre]);
+                if ($document && $document->getDisponible()) {
+                    $document->setDisponible(false);
+                    $em->persist($document);
+                }
+            } catch (\Throwable $e) {
+                // continue even if we cannot mark the document
+            }
+
             $em->flush();
+
+            // notify the user who made the demande
+            try {
+                $user = $demande->getIdUtilisateur();
+                if ($user && $user->getEmail()) {
+                    $email = (new Email())
+                        ->from('noreply@localhost')
+                        ->to($user->getEmail())
+                        ->subject('Votre demande a été approuvée')
+                        ->text(sprintf('Bonjour %s, votre demande "%s" a été approuvée par un administrateur.', $user->getPrenom() ?? $user->getEmail(), $demande->getTitreDemande()));
+                    $mailer->send($email);
+                }
+            } catch (\Throwable $e) {
+            }
+
             $this->addFlash('success', 'Demande validée (statut Réservé).');
         }
         return $this->redirectToRoute('admin_demandes');
     }
 
     #[Route('/demandes/{id}/refuse', name: 'admin_demandes_refuse', methods: ['POST'])]
-    public function refuseDemande(int $id, DemandeDocumentRepository $repo, EntityManagerInterface $em): Response
+    public function refuseDemande(int $id, DemandeDocumentRepository $repo, EntityManagerInterface $em, MailerInterface $mailer): Response
     {
         $demande = $repo->find($id);
         if ($demande) {
             $demande->setStatutDemande('Refusé');
             $em->flush();
+
+            // notify requester
+            try {
+                $user = $demande->getIdUtilisateur();
+                if ($user && $user->getEmail()) {
+                    $email = (new Email())
+                        ->from('noreply@localhost')
+                        ->to($user->getEmail())
+                        ->subject('Votre demande a été refusée')
+                        ->text(sprintf('Bonjour %s, votre demande "%s" a été refusée par un administrateur.', $user->getPrenom() ?? $user->getEmail(), $demande->getTitreDemande()));
+                    $mailer->send($email);
+                }
+            } catch (\Throwable $e) {
+            }
+
             $this->addFlash('info', 'Demande refusée.');
         }
         return $this->redirectToRoute('admin_demandes');
