@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Catalogue{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+        <h1 class="h3 mb-0">Catalogue</h1>
+        <form class="d-flex" method="get">
+            <input class="form-control me-2" type="search" name="q" value="{{ query }}" placeholder="Titre ou code-barres">
+            <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search"></i></button>
+        </form>
+    </div>
+
+    <div class="row g-3">
+        {% for d in documents %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ d.titre }}</h5>
+                        <p class="card-text text-muted mb-1">Code-barres : {{ d.codeBarres }}</p>
+                        <p class="card-text text-muted small mb-2">
+                            {% if d.idSousCategorie %}{{ d.idSousCategorie.nomSousCategorie }}{% else %}—{% endif %}
+                        </p>
+                        <div class="mb-3">
+                            <span class="badge bg-{{ d.disponible ? 'success' : 'secondary' }}">
+                                {{ d.disponible ? 'Disponible' : 'Indisponible' }}
+                            </span>
+                            {% if d.idEtat %}
+                                <span class="badge bg-light text-dark">{{ d.idEtat.libelleEtat }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="mt-auto">
+                            {% if d.disponible and app.user %}
+                                <form method="post" action="{{ path('catalogue_demande', {id: d.idDoc}) }}">
+                                    <button class="btn btn-primary w-100" type="submit">Demander / Réserver</button>
+                                </form>
+                            {% elseif not app.user %}
+                                <a class="btn btn-outline-primary w-100" href="{{ path('app_login') }}">Se connecter pour réserver</a>
+                            {% else %}
+                                <button class="btn btn-secondary w-100" disabled>Indisponible</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-12 text-muted text-center py-5">Aucun document.</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

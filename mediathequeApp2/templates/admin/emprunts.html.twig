@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin - Emprunts{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+        <h1 class="h3 mb-0">Emprunts</h1>
+        <a class="btn btn-primary" href="{{ path('admin_emprunts_new') }}"><i class="bi bi-plus"></i> Nouvel emprunt</a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Document</th>
+                        <th>Utilisateur</th>
+                        <th>Emprunt</th>
+                        <th>Retour prévu</th>
+                        <th>Retour réel</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for e in emprunts %}
+                    <tr>
+                        <td>{{ e.idEmprunt }}</td>
+                        <td>{{ e.idDoc ? e.idDoc.titre : '-' }}</td>
+                        <td>{{ e.matricule ? e.matricule.email : '-' }}</td>
+                        <td>{{ e.dateEmprunt ? e.dateEmprunt|date('d/m/Y') : '-' }}</td>
+                        <td>{{ e.dateRetourPrevue ? e.dateRetourPrevue|date('d/m/Y') : '-' }}</td>
+                        <td>
+                            {% if e.dateRetourReelle %}
+                                {{ e.dateRetourReelle|date('d/m/Y') }}
+                            {% else %}
+                                <span class="badge bg-warning text-dark">En cours</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            {% if not e.dateRetourReelle %}
+                                <form method="post" action="{{ path('admin_emprunts_return', {id: e.idEmprunt}) }}">
+                                    <button class="btn btn-sm btn-success">Clôturer</button>
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-muted text-center py-4">Aucun emprunt</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

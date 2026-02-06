@@ -1,0 +1,99 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin - Tableau de bord{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Tableau de bord</h1>
+        <a class="btn btn-outline-primary" href="{{ path('admin_documents') }}">Gérer les documents</a>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Documents</p>
+                    <h3 class="mb-0">{{ total_docs }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Disponibles</p>
+                    <h3 class="mb-0">{{ available_docs }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Emprunts actifs</p>
+                    <h3 class="mb-0">{{ active_loans }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Retards</p>
+                    <h3 class="mb-0 text-danger">{{ overdues }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Derniers documents</h5>
+                        <a class="small" href="{{ path('admin_documents') }}">Voir tout</a>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        {% for d in latest_docs %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-semibold">{{ d.titre }}</div>
+                                    <div class="text-muted small">Code-barres : {{ d.codeBarres }}</div>
+                                </div>
+                                <span class="badge bg-{{ d.disponible ? 'success' : 'secondary' }}">
+                                    {{ d.disponible ? 'Disponible' : 'Indisponible' }}
+                                </span>
+                            </li>
+                        {% else %}
+                            <li class="list-group-item text-muted">Aucun document</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Emprunts récents</h5>
+                        <span class="small text-muted">5 derniers</span>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        {% for e in recent_loans %}
+                            <li class="list-group-item">
+                                <div class="fw-semibold">{{ e.idDoc ? e.idDoc.titre : 'Document' }}</div>
+                                <div class="text-muted small">
+                                    Matricule : {{ e.matricule ? e.matricule.getMatricule : '?' }} —
+                                    Emprunté le {{ e.dateEmprunt|date('d/m/Y') }} —
+                                    Retour prévu {{ e.dateRetourPrevue|date('d/m/Y') }}
+                                </div>
+                            </li>
+                        {% else %}
+                            <li class="list-group-item text-muted">Aucun emprunt</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin - Documents{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+        <h1 class="h3 mb-0">Documents</h1>
+        <div class="d-flex gap-2">
+            <form class="d-flex" method="get">
+                <input class="form-control me-2" type="search" placeholder="Titre ou code-barres" name="q" value="{{ query }}">
+                <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search"></i></button>
+            </form>
+            <a class="btn btn-primary" href="{{ path('admin_documents_new') }}"><i class="bi bi-plus"></i> Ajouter</a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Titre</th>
+                        <th>Code-barres</th>
+                        <th>État</th>
+                        <th>Catégorie</th>
+                        <th>Disponibilité</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for d in documents %}
+                    <tr>
+                        <td class="fw-semibold">{{ d.titre }}</td>
+                        <td>{{ d.codeBarres }}</td>
+                        <td>{{ d.idEtat ? d.idEtat.libelleEtat : '-' }}</td>
+                        <td>{{ d.idSousCategorie ? d.idSousCategorie.nomSousCategorie : '-' }}</td>
+                        <td>
+                            <span class="badge bg-{{ d.disponible ? 'success' : 'secondary' }}">
+                                {{ d.disponible ? 'Disponible' : 'Indisponible' }}
+                            </span>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-muted text-center py-4">Aucun document</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

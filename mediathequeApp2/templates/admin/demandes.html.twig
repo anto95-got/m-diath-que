@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin - Demandes d'emprunt{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Demandes d'emprunt</h1>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Titre demandé</th>
+                        <th>Auteur demandé</th>
+                        <th>Type</th>
+                        <th>Matricule</th>
+                        <th>Statut</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for d in demandes %}
+                    <tr>
+                        <td>{{ d.idDemande }}</td>
+                        <td>{{ d.titreDemande }}</td>
+                        <td>{{ d.auteurDemande }}</td>
+                        <td>
+                            {% if d.typeDemande == 'proposition' %}
+                                <span class="badge bg-info text-dark">Proposition</span>
+                            {% else %}
+                                <span class="badge bg-primary">Réservation</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ d.matricule ? d.matricule.getMatricule : '-' }}</td>
+                        <td>{{ d.statutDemande }}</td>
+                        <td class="text-end d-flex gap-2 justify-content-end">
+                            <form method="post" action="{{ path('admin_demandes_approve', {id: d.idDemande}) }}">
+                                <button class="btn btn-sm btn-success">Réserver</button>
+                            </form>
+                            <form method="post" action="{{ path('admin_demandes_refuse', {id: d.idDemande}) }}">
+                                <button class="btn btn-sm btn-outline-secondary">Refuser</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-muted text-center py-4">Aucune demande en attente</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

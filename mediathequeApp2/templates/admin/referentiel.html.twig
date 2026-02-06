@@ -1,0 +1,83 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin - Référentiel{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Référentiel</h1>
+        <a class="btn btn-outline-secondary" href="{{ path('admin_documents') }}">Retour documents</a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="mb-3">Catégorie</h5>
+                    {{ form_start(forms.categorie) }}
+                        <div class="form-floating mb-3">
+                            {{ form_widget(forms.categorie.nomCategorie, {'attr': {'class': 'form-control', 'placeholder': 'Nom catégorie'}}) }}
+                            <label for="{{ forms.categorie.nomCategorie.vars.id }}">Nom de la catégorie</label>
+                            {{ form_errors(forms.categorie.nomCategorie) }}
+                        </div>
+                        <button class="btn btn-primary" type="submit">Ajouter</button>
+                    {{ form_end(forms.categorie) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="mb-3">Sous-catégorie</h5>
+                    {{ form_start(forms.sousCategorie) }}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Catégorie</label>
+                            {{ form_widget(forms.sousCategorie.idCategorie, {'attr': {'class': 'form-select'}}) }}
+                            {{ form_errors(forms.sousCategorie.idCategorie) }}
+                        </div>
+                        <div class="form-floating mb-3">
+                            {{ form_widget(forms.sousCategorie.nomSousCategorie, {'attr': {'class': 'form-control', 'placeholder': 'Nom sous-catégorie'}}) }}
+                            <label for="{{ forms.sousCategorie.nomSousCategorie.vars.id }}">Nom de la sous-catégorie</label>
+                            {{ form_errors(forms.sousCategorie.nomSousCategorie) }}
+                        </div>
+                        <button class="btn btn-primary" type="submit">Ajouter</button>
+                    {{ form_end(forms.sousCategorie) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="mb-3">État</h5>
+                    {{ form_start(forms.etat) }}
+                        <div class="form-floating mb-3">
+                            {{ form_widget(forms.etat.libelleEtat, {'attr': {'class': 'form-control', 'placeholder': 'État'}}) }}
+                            <label for="{{ forms.etat.libelleEtat.vars.id }}">Libellé</label>
+                            {{ form_errors(forms.etat.libelleEtat) }}
+                        </div>
+                        <button class="btn btn-primary" type="submit">Ajouter</button>
+                    {{ form_end(forms.etat) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="mb-3">Auteur</h5>
+                    {{ form_start(forms.auteur) }}
+                        <div class="form-floating mb-3">
+                            {{ form_widget(forms.auteur.nomPrenom, {'attr': {'class': 'form-control', 'placeholder': 'Nom prénom'}}) }}
+                            <label for="{{ forms.auteur.nomPrenom.vars.id }}">Nom & prénom</label>
+                            {{ form_errors(forms.auteur.nomPrenom) }}
+                        </div>
+                        <button class="btn btn-primary" type="submit">Ajouter</button>
+                    {{ form_end(forms.auteur) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

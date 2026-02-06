@@ -1,0 +1,134 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inscription{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h1 class="h3 mb-4 text-center">Créer un compte</h1>
+
+                    {{ form_start(registrationForm) }}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    {{ form_widget(registrationForm.nom, {'attr': {'class': 'form-control', 'placeholder': 'Nom'}}) }}
+                                    <label for="{{ registrationForm.nom.vars.id }}">Nom</label>
+                                    {{ form_errors(registrationForm.nom) }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    {{ form_widget(registrationForm.prenom, {'attr': {'class': 'form-control', 'placeholder': 'Prénom'}}) }}
+                                    <label for="{{ registrationForm.prenom.vars.id }}">Prénom</label>
+                                    {{ form_errors(registrationForm.prenom) }}
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    {{ form_widget(registrationForm.email, {'attr': {'class': 'form-control', 'placeholder': 'Email'}}) }}
+                                    <label for="{{ registrationForm.email.vars.id }}">Email</label>
+                                    {{ form_errors(registrationForm.email) }}
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating position-relative">
+                                    {{ form_widget(registrationForm.password, {
+                                        'attr': {
+                                            'class': 'form-control',
+                                            'placeholder': 'Mot de passe',
+                                            'data-password': 'true'
+                                        }
+                                    }) }}
+                                    <label for="{{ registrationForm.password.vars.id }}">Mot de passe</label>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm position-absolute top-50 end-0 translate-middle-y me-2 toggle-password" data-target="{{ registrationForm.password.vars.id }}">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    {{ form_errors(registrationForm.password) }}
+                                </div>
+                                <div class="mt-3" id="password-rules">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge rounded-circle bg-danger rule-indicator" data-rule="length">&nbsp;</span>
+                                        <span>Au moins 8 caractères</span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge rounded-circle bg-danger rule-indicator" data-rule="uppercase">&nbsp;</span>
+                                        <span>Une majuscule</span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge rounded-circle bg-danger rule-indicator" data-rule="number">&nbsp;</span>
+                                        <span>Un chiffre</span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge rounded-circle bg-danger rule-indicator" data-rule="special">&nbsp;</span>
+                                        <span>Un caractère spécial</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary w-100 mt-4" type="submit">S'inscrire</button>
+                    {{ form_end(registrationForm) }}
+
+                    <p class="text-center mt-3 mb-0">
+                        <a href="{{ path('app_login') }}">Déjà un compte ? Se connecter</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        const initRegisterUI = () => {
+            if (window.__registerInitDone) return;
+            window.__registerInitDone = true;
+
+            const passwordInput = document.querySelector('input[data-password]');
+            const toggleBtn = document.querySelector('.toggle-password');
+            const indicators = {
+                length: document.querySelector('[data-rule="length"]'),
+                uppercase: document.querySelector('[data-rule="uppercase"]'),
+                number: document.querySelector('[data-rule="number"]'),
+                special: document.querySelector('[data-rule="special"]'),
+            };
+
+            function setIndicator(el, valid) {
+                if (!el) return;
+                el.classList.toggle('bg-success', valid);
+                el.classList.toggle('bg-danger', !valid);
+            }
+
+            function checkPassword(value) {
+                setIndicator(indicators.length, value.length >= 8);
+                setIndicator(indicators.uppercase, /[A-Z]/.test(value));
+                setIndicator(indicators.number, /\d/.test(value));
+                setIndicator(indicators.special, /[^A-Za-z0-9]/.test(value));
+            }
+
+            if (passwordInput) {
+                checkPassword(passwordInput.value || '');
+                passwordInput.addEventListener('input', (e) => checkPassword(e.target.value));
+            }
+
+            if (toggleBtn && passwordInput) {
+                toggleBtn.addEventListener('click', () => {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                const icon = toggleBtn.querySelector('i');
+                icon.classList.toggle('bi-eye');
+                icon.classList.toggle('bi-eye-slash');
+            });
+        }}
+
+        // Turbo drive ne déclenche pas toujours DOMContentLoaded, on écoute les deux événements
+        document.addEventListener('DOMContentLoaded', initRegisterUI);
+        document.addEventListener('turbo:load', initRegisterUI);
+
+    </script>
+{% endblock %}

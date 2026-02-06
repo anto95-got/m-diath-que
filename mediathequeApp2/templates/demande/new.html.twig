@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Demander / Proposer un livre{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h1 class="h4 mb-4 text-center">Réservation ou proposition</h1>
+                    {{ form_start(form) }}
+                        <div class="form-floating mb-3">
+                            {{ form_widget(form.titreDemande, {'attr': {'class': 'form-control', 'placeholder': 'Titre'}}) }}
+                            <label for="{{ form.titreDemande.vars.id }}">Titre du livre</label>
+                            {{ form_errors(form.titreDemande) }}
+                        </div>
+                        <div class="form-floating mb-3">
+                            {{ form_widget(form.auteurDemande, {'attr': {'class': 'form-control', 'placeholder': 'Auteur'}}) }}
+                            <label for="{{ form.auteurDemande.vars.id }}">Auteur</label>
+                            {{ form_errors(form.auteurDemande) }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Type</label>
+                            {{ form_widget(form.typeDemande, {'attr': {'class': 'form-select'}}) }}
+                            {{ form_errors(form.typeDemande) }}
+                        </div>
+                        <button class="btn btn-primary w-100" type="submit">Envoyer</button>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

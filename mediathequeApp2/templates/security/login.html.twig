@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-5 col-md-7">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    {% if error %}
+                        <div class="alert alert-danger small">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+                    {% endif %}
+
+                    <h1 class="h4 mb-4 text-center">Connexion</h1>
+
+                    <form method="post" novalidate>
+                        <div class="form-floating mb-3">
+                            <input type="email" value="{{ last_username }}" name="_username" id="username" class="form-control" autocomplete="email" required placeholder="Email">
+                            <label for="username">Email</label>
+                        </div>
+
+                        <div class="form-floating mb-3 position-relative">
+                            <input type="password" name="_password" id="password" class="form-control" autocomplete="current-password" required placeholder="Mot de passe" data-password="true">
+                            <label for="password">Mot de passe</label>
+                            
+                            <button type="button" class="btn btn-outline-secondary btn-sm position-absolute top-50 end-0 translate-middle-y me-2 toggle-password">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                        <button class="btn btn-primary w-100" type="submit">Se connecter</button>
+                    </form>
+
+                    <p class="text-center mt-3 mb-0">
+                        <a href="{{ path('app_register') }}">Créer un compte</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // Utilisation de la même structure que ton inscription pour la compatibilité Turbo/MAMP
+        const initLoginUI = () => {
+            // Évite les doublons d'écouteurs d'événements
+            if (window.__loginInitDone) return;
+            
+            const passwordInput = document.querySelector('input[data-password="true"]');
+            const toggleBtn = document.querySelector('.toggle-password');
+
+            if (toggleBtn && passwordInput) {
+                window.__loginInitDone = true; // On marque comme fait seulement si les éléments existent
+                
+                toggleBtn.addEventListener('click', () => {
+                    const isPassword = passwordInput.getAttribute('type') === 'password';
+                    passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+                    
+                    const icon = toggleBtn.querySelector('i');
+                    if (icon) {
+                        icon.classList.toggle('bi-eye');
+                        icon.classList.toggle('bi-eye-slash');
+                    }
+                });
+            }
+        };
+
+        // On écoute DOMContentLoaded ET turbo:load (indispensable avec Symfony 6/7)
+        document.addEventListener('DOMContentLoaded', initLoginUI);
+        document.addEventListener('turbo:load', initLoginUI);
+    </script>
+{% endblock %}

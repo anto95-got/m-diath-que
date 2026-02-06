@@ -1,0 +1,63 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau document{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h1 class="h4 mb-4 text-center">Ajouter un document</h1>
+
+                    {{ form_start(form) }}
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    {{ form_widget(form.titre, {'attr': {'class': 'form-control', 'placeholder': 'Titre'}}) }}
+                                    <label for="{{ form.titre.vars.id }}">Titre</label>
+                                    {{ form_errors(form.titre) }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    {{ form_widget(form.codeBarres, {'attr': {'class': 'form-control', 'placeholder': 'Code-barres'}}) }}
+                                    <label for="{{ form.codeBarres.vars.id }}">Code-barres</label>
+                                    {{ form_errors(form.codeBarres) }}
+                                </div>
+                            </div>
+                            <div class="col-md-6 d-flex align-items-center">
+                                <div class="form-check ms-2">
+                                    {{ form_widget(form.disponible, {'attr': {'class': 'form-check-input'}}) }}
+                                    <label class="form-check-label" for="{{ form.disponible.vars.id }}">Disponible</label>
+                                    {{ form_errors(form.disponible) }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">État</label>
+                                {{ form_widget(form.idEtat, {'attr': {'class': 'form-select'}}) }}
+                                {{ form_errors(form.idEtat) }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Sous-catégorie</label>
+                                {{ form_widget(form.idSousCategorie, {'attr': {'class': 'form-select'}}) }}
+                                {{ form_errors(form.idSousCategorie) }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Auteurs</label>
+                                {{ form_widget(form.auteurs, {'attr': {'class': 'form-select', 'multiple': 'multiple', 'size': 5}}) }}
+                                {{ form_errors(form.auteurs) }}
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-4">
+                            <a class="btn btn-outline-secondary" href="{{ path('admin_documents') }}">Annuler</a>
+                            <button class="btn btn-primary" type="submit">Enregistrer</button>
+                        </div>
+                    {{ form_end(form) }}
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

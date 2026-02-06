@@ -1,0 +1,166 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil - Médiathèque{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1><i class="bi bi-book"></i> Bienvenue à la Médiathèque</h1>
+                <p class="lead">Explorez un univers infini de découvertes littéraires. Empruntez, partagez et explorez notre collection complète.</p>
+                {% if not app.user %}
+                    <div class="mt-4">
+                        <a href="{{ path('app_login') }}" class="btn btn-light btn-lg me-2">
+                            <i class="bi bi-box-arrow-in-right"></i> Se connecter
+                        </a>
+                        <a href="{{ path('app_register') }}" class="btn btn-outline-light btn-lg">
+                            <i class="bi bi-person-plus"></i> Créer un compte
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="mt-4">
+                        <a href="{{ path('catalogue_index') }}" class="btn btn-light btn-lg me-2">
+                            <i class="bi bi-search"></i> Parcourir le catalogue
+                        </a>
+                        <a href="{{ path('app_demande_new') }}" class="btn btn-outline-light btn-lg">
+                            <i class="bi bi-plus-circle"></i> Nouvelle demande
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col-lg-4 text-center">
+                <i class="bi bi-book-half" style="font-size: 6rem; opacity: 0.9;"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5">
+    <!-- Stats Section -->
+    {% if app.user %}
+    <div class="row mb-5">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body py-4">
+                    <i class="bi bi-book-half" style="font-size: 3rem; color: var(--secondary-color);"></i>
+                    <h5 class="card-title mt-3">Mes Emprunts</h5>
+                    <p class="card-text text-muted">Consultez votre historique d'emprunts</p>
+                    <a href="{{ path('app_user_index') }}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-arrow-right"></i> Voir plus
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body py-4">
+                    <i class="bi bi-plus-circle" style="font-size: 3rem; color: var(--success-color);"></i>
+                    <h5 class="card-title mt-3">Faire une Demande</h5>
+                    <p class="card-text text-muted">Proposer ou demander un document</p>
+                    <a href="{{ path('app_demande_new') }}" class="btn btn-success btn-sm">
+                        <i class="bi bi-arrow-right"></i> Créer
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body py-4">
+                    <i class="bi bi-search" style="font-size: 3rem; color: var(--warning-color);"></i>
+                    <h5 class="card-title mt-3">Découvrir</h5>
+                    <p class="card-text text-muted">Explorez notre catalogue complet</p>
+                    <a href="{{ path('catalogue_index') }}" class="btn btn-warning btn-sm">
+                        <i class="bi bi-arrow-right"></i> Rechercher
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="row mb-5">
+        <div class="col-md-6">
+            <div class="card border-0">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-shield-check" style="color: var(--success-color);"></i> Pour les Membres
+                    </h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="bi bi-check-circle-fill" style="color: var(--success-color);"></i> Accès au catalogue complet</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill" style="color: var(--success-color);"></i> Emprunter des documents</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill" style="color: var(--success-color);"></i> Proposer des documents</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill" style="color: var(--success-color);"></i> Recevoir des recommandations</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-rocket" style="color: var(--secondary-color);"></i> Commencer
+                    </h5>
+                    <p>Créez un compte en quelques minutes pour accéder à tous les services de la médiathèque.</p>
+                    <a href="{{ path('app_register') }}" class="btn btn-primary mt-3">
+                        <i class="bi bi-person-plus"></i> S'inscrire maintenant
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Latest Documents Section -->
+    <div class="mb-5">
+        <h2 class="mb-4">
+            <i class="bi bi-star"></i> Collections Populaires
+        </h2>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <i class="bi bi-book" style="font-size: 2.5rem; color: var(--secondary-color);"></i>
+                        <h5 class="card-title mt-3">Romans</h5>
+                        <p class="card-text text-muted">Plongez dans des histoires captivantes</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <i class="bi bi-mortarboard" style="font-size: 2.5rem; color: var(--success-color);"></i>
+                        <h5 class="card-title mt-3">Essais & Théorie</h5>
+                        <p class="card-text text-muted">Enrichissez vos connaissances</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <i class="bi bi-puzzle" style="font-size: 2.5rem; color: var(--warning-color);"></i>
+                        <h5 class="card-title mt-3">Jeunesse</h5>
+                        <p class="card-text text-muted">Pour petits et grands lecteurs</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="alert alert-info border-0 py-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h4 class="mb-0">
+                    <i class="bi bi-info-circle"></i> Vous avez des questions ?
+                </h4>
+                <p class="mb-0 mt-2">Consultez notre aide ou contactez notre équipe de support.</p>
+            </div>
+            <div class="col-md-4 text-end mt-3 mt-md-0">
+                <a href="#" class="btn btn-info">
+                    <i class="bi bi-question-circle"></i> Aide & FAQ
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
