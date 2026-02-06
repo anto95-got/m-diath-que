@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accès refusé — Médiathèque{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card text-center">
+        <div class="card-body">
+            <h1 class="card-title">Accès refusé</h1>
+            <p class="card-text">Vous n'avez pas les droits nécessaires pour accéder à cette page.</p>
+            {% if app.user %}
+                <a href="{{ path('home') }}" class="btn btn-primary">Retour à l'accueil</a>
+            {% else %}
+                <a href="{{ path('app_login') }}" class="btn btn-primary">Se connecter</a>
+                <a href="{{ path('app_register') }}" class="btn btn-outline-primary">S'inscrire</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

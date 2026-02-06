@@ -81,7 +81,7 @@ final class UserController extends AbstractController
         $isSuperAdmin = $current->getIdRole() && $current->getIdRole()->getNomRole() === 'ROLE_SUPER_ADMIN';
         if ($currentId !== $utilisateur->getIdUtilisateur() && !$isSuperAdmin) {
             $this->addFlash('danger', 'Accès refusé : vous ne pouvez pas modifier ce profil.');
-            return $this->redirectToRoute('home');
+            return $this->redirectToRoute('app_access_denied');
         }
         $form = $this->createForm(UtilisateurType::class, $utilisateur);
         $form->handleRequest($request);
@@ -109,7 +109,7 @@ final class UserController extends AbstractController
         $isSuperAdmin = $current->getIdRole() && $current->getIdRole()->getNomRole() === 'ROLE_SUPER_ADMIN';
         if ($currentId !== $utilisateur->getIdUtilisateur() && !$isSuperAdmin) {
             $this->addFlash('danger', 'Accès refusé : vous ne pouvez pas supprimer ce profil.');
-            return $this->redirectToRoute('home');
+            return $this->redirectToRoute('app_access_denied');
         }
 
         if ($this->isCsrfTokenValid('delete'.$utilisateur->getMatricule(), $request->request->get('_token'))) {
