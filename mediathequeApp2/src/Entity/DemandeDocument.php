@@ -26,9 +26,19 @@ class DemandeDocument
     #[ORM\Column(name: 'type_demande', length: 20, options: ['default' => 'reservation'])]
     private ?string $typeDemande = 'reservation';
 
+    #[ORM\Column(name: 'motif_refus', type: 'text', nullable: true)]
+    private ?string $motifRefus = null;
+
+    #[ORM\Column(name: 'quantite_demandee', options: ['default' => 1])]
+    private ?int $quantiteDemandee = 1;
+
     #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: 'demandes')]
     #[ORM\JoinColumn(name: 'id_utilisateur', referencedColumnName: 'id_utilisateur', nullable: false)]
     private ?Utilisateur $idUtilisateur = null;
+
+    #[ORM\ManyToOne(targetEntity: Document::class)]
+    #[ORM\JoinColumn(name: 'id_doc_demande', referencedColumnName: 'id_doc', nullable: true, onDelete: 'SET NULL')]
+    private ?Document $idDocDemande = null;
 
     public function getIdDemande(): ?int
     {
@@ -82,6 +92,29 @@ class DemandeDocument
         return $this;
     }
 
+    public function getMotifRefus(): ?string
+    {
+        return $this->motifRefus;
+    }
+
+    public function setMotifRefus(?string $motifRefus): static
+    {
+        $this->motifRefus = $motifRefus;
+        return $this;
+    }
+
+    public function getQuantiteDemandee(): ?int
+    {
+        return $this->quantiteDemandee;
+    }
+
+    public function setQuantiteDemandee(int $quantiteDemandee): static
+    {
+        $this->quantiteDemandee = max(1, $quantiteDemandee);
+
+        return $this;
+    }
+
     public function getIdUtilisateur(): ?Utilisateur
     {
         return $this->idUtilisateur;
@@ -90,6 +123,18 @@ class DemandeDocument
     public function setIdUtilisateur(?Utilisateur $idUtilisateur): static
     {
         $this->idUtilisateur = $idUtilisateur;
+
+        return $this;
+    }
+
+    public function getIdDocDemande(): ?Document
+    {
+        return $this->idDocDemande;
+    }
+
+    public function setIdDocDemande(?Document $idDocDemande): static
+    {
+        $this->idDocDemande = $idDocDemande;
 
         return $this;
     }

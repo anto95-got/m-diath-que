@@ -37,6 +37,10 @@ security:
 
     # Note: Only the *first* matching rule is applied
     access_control:
+        - { path: ^/super-admin, roles: ROLE_SUPERADMIN }
+        - { path: ^/user/profile, roles: ROLE_USER }
+        - { path: ^/forgot-password, roles: PUBLIC_ACCESS }
+        - { path: ^/reset-password, roles: PUBLIC_ACCESS }
         - { path: ^/user, roles: ROLE_ADMIN }
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/demande, roles: PUBLIC_ACCESS }

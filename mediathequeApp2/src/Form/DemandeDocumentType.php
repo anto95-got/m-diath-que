@@ -4,7 +4,7 @@ namespace App\Form;
 
 use App\Entity\DemandeDocument;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -20,12 +20,10 @@ class DemandeDocumentType extends AbstractType
             ->add('auteurDemande', TextType::class, [
                 'label' => 'Auteur',
             ])
-            ->add('typeDemande', ChoiceType::class, [
-                'label' => 'Type de demande',
-                'choices' => [
-                    'Réservation' => 'reservation',
-                    'Proposition d\'achat' => 'proposition',
-                ],
+            ->add('quantiteDemandee', IntegerType::class, [
+                'label' => 'Nombre d\'exemplaires souhaités',
+                'attr' => ['min' => 1, 'max' => 20],
+                'data' => 1,
             ]);
     }
 

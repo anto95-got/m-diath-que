@@ -2,14 +2,11 @@
 
 namespace App\Form;
 
-use App\Entity\Document;
 use App\Entity\Emprunt;
 use App\Entity\Utilisateur;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -30,14 +27,6 @@ class EmpruntType extends AbstractType
                 'mapped' => false,
                 'label' => 'Code-barres du document',
                 'attr' => ['autocomplete' => 'off'],
-            ])
-            ->add('dateRetourPrevue', DateType::class, [
-                'widget' => 'single_text',
-                'label' => 'Date retour prévue',
-            ])
-            ->add('prolonge', CheckboxType::class, [
-                'required' => false,
-                'label' => 'Prolongé ?',
             ])
         ;
     }

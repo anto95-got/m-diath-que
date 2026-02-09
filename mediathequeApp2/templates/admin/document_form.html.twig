@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Nouveau document{% endblock %}
+{% block title %}{{ source_document ? 'Nouvel exemplaire' : 'Nouveau document' }}{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -9,6 +9,11 @@
             <div class="card shadow-sm">
                 <div class="card-body p-4">
                     <h1 class="h4 mb-4 text-center">Ajouter un document</h1>
+                    {% if source_document %}
+                        <div class="alert alert-info py-2">
+                            Prérempli depuis <strong>{{ source_document.titre }}</strong>. Un nouveau code-barres a été généré automatiquement.
+                        </div>
+                    {% endif %}
 
                     {{ form_start(form) }}
                         <div class="row g-3">
@@ -21,10 +26,11 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    {{ form_widget(form.codeBarres, {'attr': {'class': 'form-control', 'placeholder': 'Code-barres'}}) }}
+                                    {{ form_widget(form.codeBarres, {'attr': {'class': 'form-control', 'placeholder': 'Code-barres', 'readonly': 'readonly'}}) }}
                                     <label for="{{ form.codeBarres.vars.id }}">Code-barres</label>
                                     {{ form_errors(form.codeBarres) }}
                                 </div>
+                                <div class="form-text">Généré automatiquement.</div>
                             </div>
                             <div class="col-md-6 d-flex align-items-center">
                                 <div class="form-check ms-2">
@@ -39,6 +45,11 @@
                                 {{ form_errors(form.idEtat) }}
                             </div>
                             <div class="col-md-6">
+                                <label class="form-label fw-semibold">Catégorie</label>
+                                {{ form_widget(form.categorie, {'attr': {'class': 'form-select'}}) }}
+                                {{ form_errors(form.categorie) }}
+                            </div>
+                            <div class="col-md-6">
                                 <label class="form-label fw-semibold">Sous-catégorie</label>
                                 {{ form_widget(form.idSousCategorie, {'attr': {'class': 'form-select'}}) }}
                                 {{ form_errors(form.idSousCategorie) }}
@@ -47,6 +58,21 @@
                                 <label class="form-label fw-semibold">Auteurs</label>
                                 {{ form_widget(form.auteurs, {'attr': {'class': 'form-select', 'multiple': 'multiple', 'size': 5}}) }}
                                 {{ form_errors(form.auteurs) }}
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    {{ form_widget(form.newAuteur, {'attr': {'class': 'form-control', 'placeholder': 'Nouvel auteur'}}) }}
+                                    <label for="{{ form.newAuteur.vars.id }}">Ajouter un nouvel auteur (optionnel)</label>
+                                    {{ form_errors(form.newAuteur) }}
+                                </div>
+                                <div class="form-text">Si le nom existe déjà, il sera réutilisé automatiquement.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    {{ form_widget(form.nombreExemplaires, {'attr': {'class': 'form-control', 'placeholder': 'Nombre d\'exemplaires'}}) }}
+                                    <label for="{{ form.nombreExemplaires.vars.id }}">Nombre d'exemplaires à créer</label>
+                                    {{ form_errors(form.nombreExemplaires) }}
+                                </div>
                             </div>
                         </div>
                         <div class="d-flex justify-content-between mt-4">
@@ -60,4 +86,41 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        (function () {
+            const categorySelect = document.getElementById('{{ form.categorie.vars.id }}');
+            const subCategorySelect = document.getElementById('{{ form.idSousCategorie.vars.id }}');
+            if (!categorySelect || !subCategorySelect) {
+                return;
+            }
+
+            const allOptions = Array.from(subCategorySelect.options).map((option) => option.cloneNode(true));
+
+            const refreshSubCategories = () => {
+                const selectedCategoryId = categorySelect.value;
+                const previousValue = subCategorySelect.value;
+
+                subCategorySelect.innerHTML = '';
+                allOptions.forEach((option) => {
+                    const optionCategoryId = option.getAttribute('data-categorie-id') || '';
+                    if (!option.value || !selectedCategoryId || optionCategoryId === selectedCategoryId) {
+                        subCategorySelect.appendChild(option.cloneNode(true));
+                    }
+                });
+
+                if (Array.from(subCategorySelect.options).some((option) => option.value === previousValue)) {
+                    subCategorySelect.value = previousValue;
+                } else {
+                    subCategorySelect.value = '';
+                }
+            };
+
+            categorySelect.addEventListener('change', refreshSubCategories);
+            refreshSubCategories();
+        })();
+    </script>
 {% endblock %}

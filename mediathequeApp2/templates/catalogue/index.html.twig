@@ -4,39 +4,130 @@
 
 {% block content %}
 <div class="container py-5">
-    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
-        <h1 class="h3 mb-0">Catalogue</h1>
-        <form class="d-flex" method="get">
-            <input class="form-control me-2" type="search" name="q" value="{{ query }}" placeholder="Titre ou code-barres">
-            <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search"></i></button>
+    <div class="d-flex flex-column gap-3 mb-4">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+            <h1 class="h3 mb-0">Catalogue</h1>
+            <a class="btn btn-outline-secondary" href="{{ path('catalogue_index') }}">Réinitialiser les filtres</a>
+        </div>
+        <form method="get" class="card card-body shadow-sm">
+            <div class="row g-2">
+                <div class="col-12 col-lg-4">
+                    <input class="form-control" type="search" name="q" value="{{ query }}" placeholder="Titre ou code-barres">
+                </div>
+                <div class="col-6 col-lg-2">
+                    <select class="form-select" name="categorie">
+                        <option value="0">Catégorie</option>
+                        {% for c in categories %}
+                            <option value="{{ c.idCategorie }}" {{ selectedCategorie == c.idCategorie ? 'selected' : '' }}>{{ c.nomCategorie }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <select class="form-select" name="sous_categorie">
+                        <option value="0">Sous-catégorie</option>
+                        {% for sc in sousCategories %}
+                            <option value="{{ sc.idSousCategorie }}" {{ selectedSousCategorie == sc.idSousCategorie ? 'selected' : '' }}>
+                                {{ sc.nomSousCategorie }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <select class="form-select" name="auteur">
+                        <option value="0">Auteur</option>
+                        {% for a in auteurs %}
+                            <option value="{{ a.idAuteur }}" {{ selectedAuteur == a.idAuteur ? 'selected' : '' }}>{{ a.nomPrenom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-6 col-lg-1">
+                    <select class="form-select" name="dispo">
+                        <option value="" {{ selectedDispo == '' ? 'selected' : '' }}>Tous</option>
+                        <option value="1" {{ selectedDispo == '1' ? 'selected' : '' }}>Dispo</option>
+                        <option value="0" {{ selectedDispo == '0' ? 'selected' : '' }}>Indispo</option>
+                        <option value="soon" {{ selectedDispo == 'soon' ? 'selected' : '' }}>Bientôt dispo</option>
+                    </select>
+                </div>
+                <div class="col-12 col-lg-1 d-grid">
+                    <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
+                </div>
+            </div>
         </form>
     </div>
 
     <div class="row g-3">
         {% for d in documents %}
+            {% set titleKey = d.titre|trim|lower %}
+            {% set hasAlreadyRequested = app.user and (requestedDocumentIds[d.idDoc]|default(false)) %}
+            {% set hasAlreadyRequestedTitle = app.user and (requestedTitles[titleKey]|default(false)) %}
+            {% set pendingDemandeIdForDocument = pendingReservationIdsByDocument[d.idDoc]|default(0) %}
+            {% set pendingDemandeIdForTitle = pendingReservationIdsByTitle[titleKey]|default(0) %}
+            {% set availableCopiesForTitle = availableCopiesByTitle[titleKey]|default(0) %}
+            {% set hasAnotherCopyAvailable = (not d.disponible) and availableCopiesForTitle > 0 %}
             <div class="col-md-6 col-lg-4">
                 <div class="card h-100 shadow-sm">
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title">{{ d.titre }}</h5>
                         <p class="card-text text-muted mb-1">Code-barres : {{ d.codeBarres }}</p>
+                        <p class="card-text text-muted small mb-1">
+                            Auteur(s) :
+                            {% if d.auteurs|length %}
+                                {% for auteur in d.auteurs %}
+                                    {{ auteur.nomPrenom }}{% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </p>
                         <p class="card-text text-muted small mb-2">
-                            {% if d.idSousCategorie %}{{ d.idSousCategorie.nomSousCategorie }}{% else %}—{% endif %}
+                            {% if d.idSousCategorie and d.idSousCategorie.idCategorie %}
+                                {{ d.idSousCategorie.idCategorie.nomCategorie }} · {{ d.idSousCategorie.nomSousCategorie }}
+                            {% elseif d.idSousCategorie %}
+                                {{ d.idSousCategorie.nomSousCategorie }}
+                            {% else %}
+                                —
+                            {% endif %}
                         </p>
                         <div class="mb-3">
                             <span class="badge bg-{{ d.disponible ? 'success' : 'secondary' }}">
                                 {{ d.disponible ? 'Disponible' : 'Indisponible' }}
                             </span>
+                            {% if d.bientotDisponible %}
+                                <span class="badge bg-warning text-dark">Bientôt disponible</span>
+                            {% endif %}
                             {% if d.idEtat %}
                                 <span class="badge bg-light text-dark">{{ d.idEtat.libelleEtat }}</span>
                             {% endif %}
                         </div>
                         <div class="mt-auto">
-                            {% if d.disponible and app.user %}
+                            {% if not app.user %}
+                                <a class="btn btn-outline-primary w-100" href="{{ path('app_login') }}">Se connecter pour réserver</a>
+                            {% elseif d.bientotDisponible %}
+                                <button class="btn btn-outline-warning w-100" disabled>Bientôt disponible</button>
+                            {% elseif hasAlreadyRequestedTitle %}
+                                <button class="btn btn-warning w-100 text-dark mb-2" disabled>Déjà demandé à emprunter</button>
+                                {% if pendingDemandeIdForTitle %}
+                                    <form method="post" action="{{ path('catalogue_demande_cancel', {id: pendingDemandeIdForTitle}) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('cancel_demande' ~ pendingDemandeIdForTitle) }}">
+                                        <button class="btn btn-outline-danger w-100" type="submit">Retirer ma demande</button>
+                                    </form>
+                                {% endif %}
+                            {% elseif hasAlreadyRequested %}
+                                <button class="btn btn-warning w-100 text-dark mb-2" disabled>Déjà demandé cet exemplaire</button>
+                                {% if pendingDemandeIdForDocument %}
+                                    <form method="post" action="{{ path('catalogue_demande_cancel', {id: pendingDemandeIdForDocument}) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('cancel_demande' ~ pendingDemandeIdForDocument) }}">
+                                        <button class="btn btn-outline-danger w-100" type="submit">Retirer ma demande</button>
+                                    </form>
+                                {% endif %}
+                            {% elseif d.disponible %}
                                 <form method="post" action="{{ path('catalogue_demande', {id: d.idDoc}) }}">
                                     <button class="btn btn-primary w-100" type="submit">Demander / Réserver</button>
                                 </form>
-                            {% elseif not app.user %}
-                                <a class="btn btn-outline-primary w-100" href="{{ path('app_login') }}">Se connecter pour réserver</a>
+                            {% elseif hasAnotherCopyAvailable %}
+                                <form method="post" action="{{ path('catalogue_demande', {id: d.idDoc}) }}">
+                                    <button class="btn btn-info w-100" type="submit">Demander un autre exemplaire</button>
+                                </form>
                             {% else %}
                                 <button class="btn btn-secondary w-100" disabled>Indisponible</button>
                             {% endif %}

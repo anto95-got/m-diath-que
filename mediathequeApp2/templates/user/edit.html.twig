@@ -1,13 +1,28 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Utilisateur{% endblock %}
+{% block title %}Modifier un utilisateur{% endblock %}
 
-{% block body %}
-    <h1>Edit Utilisateur</h1>
-
-    {{ include('user/_form.html.twig', {'button_label': 'Update'}) }}
-
-    <a href="{{ path('app_user_index') }}">back to list</a>
-
-    {{ include('user/_delete_form.html.twig') }}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h1 class="h4 mb-3 text-center">
+                        {{ is_own_profile ? 'Modifier mon profil' : 'Modifier un utilisateur' }}
+                    </h1>
+                    {% if not is_own_profile %}
+                        <div class="alert alert-info py-2">
+                            Le mot de passe de cet utilisateur ne peut pas être modifié ici.
+                        </div>
+                    {% endif %}
+                    {{ include('user/_form.html.twig', {
+                        button_label: 'Enregistrer',
+                        back_path: is_own_profile ? path('app_profile') : path('app_user_show', {'idUtilisateur': utilisateur.idUtilisateur})
+                    }) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

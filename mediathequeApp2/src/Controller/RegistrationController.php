@@ -17,7 +17,6 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Psr\Log\LoggerInterface;
-use DateTimeImmutable;
 
 class RegistrationController extends AbstractController
 {
@@ -55,7 +54,7 @@ class RegistrationController extends AbstractController
             $code = (string) random_int(100000, 999999);
             $user->setConfirmationCode($code);
             $user->setIsVerified(false);
-            $user->setConfirmationExpiresAt(new DateTimeImmutable('+15 minutes'));
+            $user->setConfirmationExpiresAt(new \DateTime('+15 minutes'));
 
             $entityManager->persist($user);
             $entityManager->flush();

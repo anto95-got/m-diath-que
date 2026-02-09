@@ -13,7 +13,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 #[AsCommand(
     name: 'app:send-return-reminders',
-    description: 'Envoie les rappels d\'emprunt (J-5 puis quotidien si en retard)',
+    description: 'Envoie les rappels d\'emprunt à J-30, J-7 et J-1 avant la date de retour',
 )]
 class SendReturnRemindersCommand extends Command
 {
@@ -27,9 +27,9 @@ class SendReturnRemindersCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $today = new \DateTimeImmutable('today');
+        $today = new \DateTime('today');
 
-        $emprunts = $this->empruntRepository->findBy(['dateRetourReelle' => null]);
+        $emprunts = $this->empruntRepository->findBy(['dateRetourEffectif' => null]);
 
         foreach ($emprunts as $emprunt) {
             $due = $emprunt->getDateRetourPrevue();
@@ -43,25 +43,24 @@ class SendReturnRemindersCommand extends Command
             $subject = '';
             $body = '';
 
-            if ($diffDays === 5) {
+            if ($diffDays === 30) {
                 $send = true;
-                $subject = 'Rappel : retour de votre emprunt dans 5 jours';
-            } elseif ($diffDays < 0) {
-                // en retard : on envoie chaque jour
+                $subject = 'Rappel : retour de votre emprunt dans 30 jours';
+            } elseif ($diffDays === 7) {
                 $send = true;
-                $subject = 'Retard de retour d\'un document';
-            } elseif ($diffDays === 4) {
+                $subject = 'Rappel : retour de votre emprunt dans 7 jours';
+            } elseif ($diffDays === 1) {
                 $send = true;
-                $subject = 'Rappel : retour de votre emprunt dans 4 jours';
+                $subject = 'Rappel : retour de votre emprunt demain';
             }
 
             if ($send) {
                 $body = sprintf(
-                    "Bonjour %s,\n\nLe document \"%s\" est à rendre pour le %s.\n%s\n\nMerci.",
+                    "Bonjour %s,\n\nLe document \"%s\" est à rendre pour le %s.\nIl reste %d jour(s) avant l'échéance.\n\nMerci.",
                     $emprunt->getIdUtilisateur()->getNom() ?? 'utilisateur',
                     $emprunt->getIdDoc()?->getTitre() ?? 'Document',
                     $due->format('d/m/Y'),
-                    $diffDays < 0 ? 'Le document est en retard, merci de le rapporter au plus vite.' : 'Merci de prévoir son retour.'
+                    $diffDays
                 );
 
                 $email = (new Email())

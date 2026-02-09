@@ -1,11 +1,83 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Admin - Demandes d'emprunt{% endblock %}
+{% block title %}Admin - Gestion des demandes{% endblock %}
 
 {% block content %}
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">Demandes d'emprunt</h1>
+        <h1 class="h3 mb-0">Demandes de réservation</h1>
+    </div>
+
+    <div class="card shadow-sm mb-5">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Titre</th>
+                        <th>Auteur</th>
+                        <th>Utilisateur</th>
+                        <th>Statut</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for d in reservation_demandes %}
+                    <tr>
+                        <td>{{ d.idDemande }}</td>
+                        <td>{{ d.titreDemande }}</td>
+                        <td>{{ d.auteurDemande }}</td>
+                        <td>
+                            {% if d.idUtilisateur %}
+                                {{ d.idUtilisateur.prenom }} {{ d.idUtilisateur.nom }}<br>
+                                <small class="text-muted">{{ d.idUtilisateur.email }}</small>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if d.statutDemande == 'En attente' %}
+                                <span class="badge bg-warning text-dark">En attente</span>
+                            {% elseif d.statutDemande == 'Réservé' %}
+                                <span class="badge bg-info text-dark">Réservé</span>
+                            {% elseif d.statutDemande == 'Emprunté' %}
+                                <span class="badge bg-success">Emprunté</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ d.statutDemande }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end d-flex gap-2 justify-content-end">
+                            {% if d.statutDemande == 'En attente' %}
+                                <form method="post" action="{{ path('admin_demandes_approve', {id: d.idDemande}) }}">
+                                    <button class="btn btn-sm btn-success">Mettre de côté</button>
+                                </form>
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-outline-secondary js-open-refuse-modal"
+                                    data-demand-title="{{ d.titreDemande|e('html_attr') }}"
+                                    data-refuse-url="{{ path('admin_demandes_refuse', {id: d.idDemande}) }}"
+                                >
+                                    Refuser
+                                </button>
+                            {% elseif d.statutDemande == 'Réservé' %}
+                                <form method="post" action="{{ path('admin_demandes_checkout', {id: d.idDemande}) }}">
+                                    <button class="btn btn-sm btn-primary">Confirmer l'emprunt</button>
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-muted text-center py-4">Aucune demande de réservation</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h3 mb-0">Propositions d'achat</h2>
     </div>
 
     <div class="card shadow-sm">
@@ -14,41 +86,70 @@
                 <thead class="table-light">
                     <tr>
                         <th>#</th>
-                        <th>Titre demandé</th>
-                        <th>Auteur demandé</th>
-                        <th>Type</th>
-                        <th>Matricule</th>
+                        <th>Titre</th>
+                        <th>Auteur</th>
+                        <th>Qté</th>
+                        <th>Utilisateur</th>
                         <th>Statut</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                {% for d in demandes %}
+                {% for d in purchase_demandes %}
                     <tr>
                         <td>{{ d.idDemande }}</td>
                         <td>{{ d.titreDemande }}</td>
                         <td>{{ d.auteurDemande }}</td>
+                        <td>{{ d.quantiteDemandee }}</td>
                         <td>
-                            {% if d.typeDemande == 'proposition' %}
-                                <span class="badge bg-info text-dark">Proposition</span>
+                            {% if d.idUtilisateur %}
+                                {{ d.idUtilisateur.prenom }} {{ d.idUtilisateur.nom }}<br>
+                                <small class="text-muted">{{ d.idUtilisateur.email }}</small>
                             {% else %}
-                                <span class="badge bg-primary">Réservation</span>
+                                -
                             {% endif %}
                         </td>
-                        <td>{{ d.matricule ? d.matricule.getMatricule : '-' }}</td>
-                        <td>{{ d.statutDemande }}</td>
+                        <td>
+                            {% if d.statutDemande == 'En attente' %}
+                                <span class="badge bg-warning text-dark">En attente</span>
+                            {% elseif d.statutDemande == 'Commandé' %}
+                                <span class="badge bg-info text-dark">Commandé</span>
+                            {% elseif d.statutDemande == 'Ajouté' %}
+                                <span class="badge bg-success">Ajouté</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ d.statutDemande }}</span>
+                            {% endif %}
+                        </td>
                         <td class="text-end d-flex gap-2 justify-content-end">
-                            <form method="post" action="{{ path('admin_demandes_approve', {id: d.idDemande}) }}">
-                                <button class="btn btn-sm btn-success">Réserver</button>
-                            </form>
-                            <form method="post" action="{{ path('admin_demandes_refuse', {id: d.idDemande}) }}">
-                                <button class="btn btn-sm btn-outline-secondary">Refuser</button>
-                            </form>
+                            {% if d.statutDemande == 'En attente' %}
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-primary js-open-order-modal"
+                                    data-order-url="{{ path('admin_demandes_order_purchase', {id: d.idDemande}) }}"
+                                    data-demand-title="{{ d.titreDemande|e('html_attr') }}"
+                                    data-demand-author="{{ d.auteurDemande|e('html_attr') }}"
+                                    data-demand-quantity="{{ d.quantiteDemandee }}"
+                                >
+                                    Commander
+                                </button>
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-outline-secondary js-open-refuse-modal"
+                                    data-demand-title="{{ d.titreDemande|e('html_attr') }}"
+                                    data-refuse-url="{{ path('admin_demandes_refuse', {id: d.idDemande}) }}"
+                                >
+                                    Refuser
+                                </button>
+                            {% elseif d.statutDemande == 'Commandé' %}
+                                <form method="post" action="{{ path('admin_demandes_receive_purchase', {id: d.idDemande}) }}">
+                                    <button class="btn btn-sm btn-success">Marquer arrivé</button>
+                                </form>
+                            {% endif %}
                         </td>
                     </tr>
                 {% else %}
                     <tr>
-                        <td colspan="6" class="text-muted text-center py-4">Aucune demande en attente</td>
+                        <td colspan="7" class="text-muted text-center py-4">Aucune proposition d'achat</td>
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -56,4 +157,179 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="orderPurchaseModal" tabindex="-1" aria-labelledby="orderPurchaseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form id="orderPurchaseForm" method="post" action="">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderPurchaseModalLabel">Commander des exemplaires</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="orderTitleInput" class="form-label">Titre</label>
+                            <input id="orderTitleInput" name="titre_demande" type="text" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="orderAuthorInput" class="form-label">Auteur(s)</label>
+                            <input id="orderAuthorInput" name="auteur_demande" type="text" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="orderQuantityInput" class="form-label">Quantité</label>
+                            <input id="orderQuantityInput" name="quantite" type="number" class="form-control" min="1" max="100" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="orderCategorieSelect" class="form-label">Catégorie</label>
+                            <select id="orderCategorieSelect" class="form-select" required>
+                                <option value="">Choisir</option>
+                                {% for c in categories %}
+                                    <option value="{{ c.idCategorie }}">{{ c.nomCategorie }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="orderSousCategorieSelect" class="form-label">Sous-catégorie</label>
+                            <select id="orderSousCategorieSelect" name="sous_categorie_id" class="form-select" required>
+                                <option value="">Choisir</option>
+                                {% for sc in sous_categories %}
+                                    <option value="{{ sc.idSousCategorie }}" data-categorie-id="{{ sc.idCategorie ? sc.idCategorie.idCategorie : '' }}">
+                                        {{ sc.nomSousCategorie }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="orderEtatSelect" class="form-label">État initial</label>
+                            <select id="orderEtatSelect" name="etat_id" class="form-select" required>
+                                <option value="">Choisir</option>
+                                {% for etat in etats %}
+                                    <option value="{{ etat.idEtat }}">{{ etat.libelleEtat }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <p class="text-muted small mt-3 mb-0">
+                        Cette action crée directement les exemplaires dans le catalogue, marqués “Bientôt disponible”.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Valider la commande</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="refuseDemandeModal" tabindex="-1" aria-labelledby="refuseDemandeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="refuseDemandeForm" method="post" action="">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="refuseDemandeModalLabel">Refuser la demande</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-2">Tu vas refuser la demande pour:</p>
+                    <p class="fw-semibold" id="refuseDemandeTitle"></p>
+                    <label for="motifRefusInput" class="form-label mt-2">Motif du refus</label>
+                    <textarea
+                        id="motifRefusInput"
+                        name="motif_refus"
+                        class="form-control"
+                        rows="4"
+                        minlength="3"
+                        maxlength="1000"
+                        required
+                        placeholder="Ex: information incomplète, budget non validé, etc."
+                    ></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-danger">Confirmer le refus</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        (() => {
+            if (typeof bootstrap === 'undefined') {
+                return;
+            }
+
+            const orderModalEl = document.getElementById('orderPurchaseModal');
+            const orderFormEl = document.getElementById('orderPurchaseForm');
+            const orderTitleEl = document.getElementById('orderTitleInput');
+            const orderAuthorEl = document.getElementById('orderAuthorInput');
+            const orderQuantityEl = document.getElementById('orderQuantityInput');
+            const orderCategoryEl = document.getElementById('orderCategorieSelect');
+            const orderSubCategoryEl = document.getElementById('orderSousCategorieSelect');
+            const allSubCategoryOptions = orderSubCategoryEl ? Array.from(orderSubCategoryEl.options).map((option) => option.cloneNode(true)) : [];
+
+            const refreshSubCategories = () => {
+                if (!orderCategoryEl || !orderSubCategoryEl) {
+                    return;
+                }
+                const selectedCategoryId = orderCategoryEl.value;
+                const previousValue = orderSubCategoryEl.value;
+                orderSubCategoryEl.innerHTML = '';
+                allSubCategoryOptions.forEach((option) => {
+                    const optionCategoryId = option.getAttribute('data-categorie-id') || '';
+                    if (!option.value || !selectedCategoryId || optionCategoryId === selectedCategoryId) {
+                        orderSubCategoryEl.appendChild(option.cloneNode(true));
+                    }
+                });
+                if (Array.from(orderSubCategoryEl.options).some((option) => option.value === previousValue)) {
+                    orderSubCategoryEl.value = previousValue;
+                } else {
+                    orderSubCategoryEl.value = '';
+                }
+            };
+
+            if (orderCategoryEl) {
+                orderCategoryEl.addEventListener('change', refreshSubCategories);
+            }
+
+            if (orderModalEl && orderFormEl && orderTitleEl && orderAuthorEl && orderQuantityEl) {
+                const orderModal = new bootstrap.Modal(orderModalEl);
+                document.querySelectorAll('.js-open-order-modal').forEach((button) => {
+                    button.addEventListener('click', () => {
+                        orderFormEl.action = button.getAttribute('data-order-url') || '';
+                        orderTitleEl.value = button.getAttribute('data-demand-title') || '';
+                        orderAuthorEl.value = button.getAttribute('data-demand-author') || '';
+                        orderQuantityEl.value = button.getAttribute('data-demand-quantity') || '1';
+                        if (orderCategoryEl) {
+                            orderCategoryEl.value = '';
+                        }
+                        refreshSubCategories();
+                        orderModal.show();
+                    });
+                });
+            }
+
+            const refuseModalEl = document.getElementById('refuseDemandeModal');
+            const refuseFormEl = document.getElementById('refuseDemandeForm');
+            const refuseTitleEl = document.getElementById('refuseDemandeTitle');
+            const refuseReasonEl = document.getElementById('motifRefusInput');
+
+            if (refuseModalEl && refuseFormEl && refuseTitleEl && refuseReasonEl) {
+                const refuseModal = new bootstrap.Modal(refuseModalEl);
+                document.querySelectorAll('.js-open-refuse-modal').forEach((button) => {
+                    button.addEventListener('click', () => {
+                        refuseFormEl.action = button.getAttribute('data-refuse-url') || '';
+                        refuseTitleEl.textContent = button.getAttribute('data-demand-title') || '';
+                        refuseReasonEl.value = '';
+                        refuseModal.show();
+                    });
+                });
+            }
+        })();
+    </script>
 {% endblock %}

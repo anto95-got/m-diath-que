@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\DemandeDocument;
 use App\Form\DemandeDocumentType;
 use App\Repository\DemandeDocumentRepository;
+use App\Repository\DocumentRepository;
 use App\Repository\UtilisateurRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,8 +17,14 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class DemandeController extends AbstractController
 {
-    #[Route('/demande', name: 'app_demande_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $em, DemandeDocumentRepository $demandeRepo, UtilisateurRepository $utilisateurRepo, MailerInterface $mailer): Response
+    #[Route('/demande', name: 'app_demande_new', methods: ['GET'])]
+    public function redirectLegacy(): Response
+    {
+        return $this->redirectToRoute('app_demande_achat');
+    }
+
+    #[Route('/demande/achat', name: 'app_demande_achat', methods: ['GET', 'POST'])]
+    public function achat(Request $request, EntityManagerInterface $em, DemandeDocumentRepository $demandeRepo, DocumentRepository $documentRepo, UtilisateurRepository $utilisateurRepo, MailerInterface $mailer): Response
     {
         $user = $this->getUser();
         if (!$user) {
@@ -32,10 +39,20 @@ class DemandeController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Prevent duplicate active demandes by same user for same title/type
-            $existing = $demandeRepo->findActiveDuplicate($user, $demande->getTitreDemande(), $demande->getTypeDemande());
-            if ($existing) {
-                $this->addFlash('warning', 'Vous avez déjà une demande en cours pour ce document.');
+            $titre = trim((string) $demande->getTitreDemande());
+            $auteur = trim((string) $demande->getAuteurDemande());
+            $demande->setTitreDemande($titre);
+            $demande->setAuteurDemande($auteur);
+            $demande->setTypeDemande('proposition');
+            $demande->setQuantiteDemandee(max(1, (int) $demande->getQuantiteDemandee()));
+
+            if ($documentRepo->hasAnyCopyForTitle($titre)) {
+                $this->addFlash('warning', 'Ce livre existe déjà dans le catalogue. Utilisez la demande de réservation depuis le catalogue.');
+                return $this->redirectToRoute('home');
+            }
+
+            if ($demandeRepo->findActivePropositionDuplicate($user, $titre) !== null) {
+                $this->addFlash('warning', 'Vous avez déjà proposé ce document. Une seule proposition est autorisée par utilisateur.');
                 return $this->redirectToRoute('home');
             }
 
@@ -52,8 +69,16 @@ class DemandeController extends AbstractController
                     $email = (new Email())
                         ->from('noreply@localhost')
                         ->to($admin->getEmail())
-                        ->subject('Nouvelle demande — Médiathèque')
-                        ->text(sprintf("Nouvelle demande de %s %s (%s): %s — %s", $user->getPrenom(), $user->getNom(), $user->getEmail(), $demande->getTitreDemande(), $demande->getTypeDemande()));
+                        ->subject('Nouvelle proposition d\'achat — Médiathèque')
+                        ->text(sprintf(
+                            "Proposition d'achat de %s %s (%s)\nTitre: %s\nAuteur: %s\nQuantité souhaitée: %d",
+                            $user->getPrenom(),
+                            $user->getNom(),
+                            $user->getEmail(),
+                            $demande->getTitreDemande(),
+                            $demande->getAuteurDemande(),
+                            $demande->getQuantiteDemandee()
+                        ));
                     $mailer->send($email);
                 }
             } catch (\Throwable $e) {
@@ -61,7 +86,7 @@ class DemandeController extends AbstractController
                 // optionally: $this->get('logger')->error(...)
             }
 
-            $this->addFlash('success', 'Demande envoyée. Un administrateur en a été informé.');
+            $this->addFlash('success', 'Proposition d\'achat envoyée. Un administrateur en a été informé.');
             return $this->redirectToRoute('home');
         }
 

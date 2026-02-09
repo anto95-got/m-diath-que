@@ -1,4 +1,52 @@
 {{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="form-floating">
+                {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Nom'}}) }}
+                <label for="{{ form.nom.vars.id }}">Nom</label>
+            </div>
+            {{ form_errors(form.nom) }}
+        </div>
+        <div class="col-md-6">
+            <div class="form-floating">
+                {{ form_widget(form.prenom, {'attr': {'class': 'form-control', 'placeholder': 'Prénom'}}) }}
+                <label for="{{ form.prenom.vars.id }}">Prénom</label>
+            </div>
+            {{ form_errors(form.prenom) }}
+        </div>
+
+        <div class="col-12">
+            <div class="form-floating">
+                {{ form_widget(form.email, {'attr': {'class': 'form-control', 'placeholder': 'Email'}}) }}
+                <label for="{{ form.email.vars.id }}">Email</label>
+            </div>
+            {{ form_errors(form.email) }}
+        </div>
+
+        {% if form.password is defined %}
+            <div class="col-12">
+                <div class="form-floating">
+                    {{ form_widget(form.password, {'attr': {'class': 'form-control', 'placeholder': 'Mot de passe'}}) }}
+                    <label for="{{ form.password.vars.id }}">Mot de passe</label>
+                </div>
+                {% if form.password.vars.help %}
+                    <div class="form-text">{{ form.password.vars.help }}</div>
+                {% endif %}
+                {{ form_errors(form.password) }}
+            </div>
+        {% endif %}
+
+        {% if form.idRole is defined %}
+            <div class="col-12">
+                <label class="form-label fw-semibold">Rôle</label>
+                {{ form_widget(form.idRole, {'attr': {'class': 'form-select'}}) }}
+                {{ form_errors(form.idRole) }}
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="d-flex justify-content-between mt-4">
+        <a class="btn btn-outline-secondary" href="{{ back_path|default(path('app_user_index')) }}">Annuler</a>
+        <button class="btn btn-primary" type="submit">{{ button_label|default('Enregistrer') }}</button>
+    </div>
 {{ form_end(form) }}

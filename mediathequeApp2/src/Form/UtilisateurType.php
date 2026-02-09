@@ -26,25 +26,38 @@ class UtilisateurType extends AbstractType
             ])
             ->add('email', EmailType::class, [
                 'label' => 'Email',
-            ])
-            ->add('password', PasswordType::class, [
+            ]);
+
+        if ($options['can_edit_password']) {
+            $builder->add('password', PasswordType::class, [
                 'label' => 'Mot de passe',
                 'required' => false,
-            ])
-            ->add('idRole', EntityType::class, [
+                'help' => $options['password_help'],
+            ]);
+        }
+
+        if ($options['can_edit_role']) {
+            $builder->add('idRole', EntityType::class, [
                 'class' => Role::class,
                 'choice_label' => 'nomRole',
                 'label' => 'Rôle',
                 'placeholder' => 'Sélectionner un rôle',
                 'required' => true,
-            ])
-        ;
+            ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Utilisateur::class,
+            'can_edit_role' => true,
+            'can_edit_password' => true,
+            'password_help' => null,
         ]);
+
+        $resolver->setAllowedTypes('can_edit_role', 'bool');
+        $resolver->setAllowedTypes('can_edit_password', 'bool');
+        $resolver->setAllowedTypes('password_help', ['null', 'string']);
     }
 }

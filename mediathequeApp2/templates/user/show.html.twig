@@ -3,36 +3,29 @@
 {% block title %}Utilisateur{% endblock %}
 
 {% block content %}
-    <h1>Utilisateur</h1>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h1 class="h4 mb-4">Mon profil</h1>
+                    <table class="table">
+                        <tbody>
+                            <tr><th>ID</th><td>{{ utilisateur.idUtilisateur }}</td></tr>
+                            <tr><th>Nom</th><td>{{ utilisateur.nom }}</td></tr>
+                            <tr><th>Prénom</th><td>{{ utilisateur.prenom }}</td></tr>
+                            <tr><th>Email</th><td>{{ utilisateur.email }}</td></tr>
+                            <tr><th>Rôle</th><td>{{ utilisateur.idRole ? utilisateur.idRole.nomRole : 'user' }}</td></tr>
+                        </tbody>
+                    </table>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Matricule</th>
-                <td>{{ utilisateur.matricule }}</td>
-            </tr>
-            <tr>
-                <th>Nom</th>
-                <td>{{ utilisateur.nom }}</td>
-            </tr>
-            <tr>
-                <th>Prenom</th>
-                <td>{{ utilisateur.prenom }}</td>
-            </tr>
-            <tr>
-                <th>Email</th>
-                <td>{{ utilisateur.email }}</td>
-            </tr>
-            <tr>
-                <th>Password</th>
-                <td>{{ utilisateur.password }}</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_user_index') }}">back to list</a>
-
-    <a href="{{ path('app_user_edit', {'matricule': utilisateur.matricule}) }}">edit</a>
-
-    {{ include('user/_delete_form.html.twig') }}
+                    <div class="d-flex gap-2">
+                        <a class="btn btn-outline-primary" href="{{ path('app_user_edit', {'idUtilisateur': utilisateur.idUtilisateur}) }}">Modifier</a>
+                        <a class="btn btn-outline-secondary" href="{{ path('home') }}">Retour</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

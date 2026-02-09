@@ -37,13 +37,19 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $telephone = null;
 
     #[ORM\Column(name: 'date_inscription', type: 'datetime', nullable: true)]
-    private ?\DateTimeInterface $dateInscription = null;
+    private ?\DateTime $dateInscription = null;
 
     #[ORM\Column(name: 'actif', type: 'boolean', options: ['default' => true])]
     private ?bool $actif = true;
 
     #[ORM\Column(name: 'verification_code', length: 6, nullable: true)]
     private ?string $verificationCode = null;
+
+    #[ORM\Column(name: 'password_reset_code', length: 6, nullable: true)]
+    private ?string $passwordResetCode = null;
+
+    #[ORM\Column(name: 'password_reset_expires_at', type: 'datetime', nullable: true)]
+    private ?\DateTime $passwordResetExpiresAt = null;
 
     #[ORM\ManyToOne(targetEntity: Role::class, inversedBy: 'utilisateurs')]
     #[ORM\JoinColumn(name: 'id_role', referencedColumnName: 'id_role', nullable: false)]
@@ -145,12 +151,12 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getDateInscription(): ?\DateTimeInterface
+    public function getDateInscription(): ?\DateTime
     {
         return $this->dateInscription;
     }
 
-    public function setDateInscription(?\DateTimeInterface $dateInscription): static
+    public function setDateInscription(?\DateTime $dateInscription): static
     {
         $this->dateInscription = $dateInscription;
         return $this;
@@ -175,6 +181,28 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function setVerificationCode(?string $verificationCode): static
     {
         $this->verificationCode = $verificationCode;
+        return $this;
+    }
+
+    public function getPasswordResetCode(): ?string
+    {
+        return $this->passwordResetCode;
+    }
+
+    public function setPasswordResetCode(?string $passwordResetCode): static
+    {
+        $this->passwordResetCode = $passwordResetCode;
+        return $this;
+    }
+
+    public function getPasswordResetExpiresAt(): ?\DateTime
+    {
+        return $this->passwordResetExpiresAt;
+    }
+
+    public function setPasswordResetExpiresAt(?\DateTime $passwordResetExpiresAt): static
+    {
+        $this->passwordResetExpiresAt = $passwordResetExpiresAt;
         return $this;
     }
 
@@ -247,12 +275,36 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $roles = ['ROLE_USER'];
         if ($this->idRole && method_exists($this->idRole, 'getNomRole')) {
-            $nom = $this->idRole->getNomRole();
+            $nom = strtoupper((string) $this->idRole->getNomRole());
             if ($nom) {
+                if ($nom === 'ADMIN') {
+                    $nom = 'ROLE_ADMIN';
+                } elseif ($nom === 'USER') {
+                    $nom = 'ROLE_USER';
+                } elseif ($nom === 'SUPERADMIN' || $nom === 'SUPER_ADMIN') {
+                    $nom = 'ROLE_SUPERADMIN';
+                } elseif (!str_starts_with($nom, 'ROLE_')) {
+                    $nom = 'ROLE_' . $nom;
+                }
                 $roles[] = $nom;
+                if ($nom === 'ROLE_SUPERADMIN') {
+                    $roles[] = 'ROLE_ADMIN';
+                }
             }
         }
         return array_values(array_unique($roles));
+    }
+
+    public function isAdmin(): bool
+    {
+        $roles = $this->getRoles();
+        return in_array('ROLE_ADMIN', $roles, true) || $this->isSuperAdmin();
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        $roles = $this->getRoles();
+        return in_array('ROLE_SUPERADMIN', $roles, true) || in_array('ROLE_SUPER_ADMIN', $roles, true);
     }
 
     public function eraseCredentials(): void

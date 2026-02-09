@@ -25,6 +25,9 @@ class Document
     #[ORM\Column(name: 'disponible', type: 'boolean', options: ['default' => true])]
     private ?bool $disponible = true;
 
+    #[ORM\Column(name: 'bientot_disponible', type: 'boolean', options: ['default' => false])]
+    private ?bool $bientotDisponible = false;
+
     #[ORM\ManyToOne(targetEntity: Etat::class, inversedBy: 'documents')]
     #[ORM\JoinColumn(name: 'id_etat', referencedColumnName: 'id_etat', nullable: false)]
     private ?Etat $idEtat = null;
@@ -91,6 +94,23 @@ class Document
     public function setDisponible(bool $disponible): static
     {
         $this->disponible = $disponible;
+
+        return $this;
+    }
+
+    public function getBientotDisponible(): ?bool
+    {
+        return $this->bientotDisponible;
+    }
+
+    public function isBientotDisponible(): ?bool
+    {
+        return $this->bientotDisponible;
+    }
+
+    public function setBientotDisponible(bool $bientotDisponible): static
+    {
+        $this->bientotDisponible = $bientotDisponible;
 
         return $this;
     }

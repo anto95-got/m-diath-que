@@ -25,6 +25,7 @@
                         <th>État</th>
                         <th>Catégorie</th>
                         <th>Disponibilité</th>
+                        <th class="text-end">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -33,16 +34,37 @@
                         <td class="fw-semibold">{{ d.titre }}</td>
                         <td>{{ d.codeBarres }}</td>
                         <td>{{ d.idEtat ? d.idEtat.libelleEtat : '-' }}</td>
-                        <td>{{ d.idSousCategorie ? d.idSousCategorie.nomSousCategorie : '-' }}</td>
+                        <td>
+                            {% if d.idSousCategorie and d.idSousCategorie.idCategorie %}
+                                {{ d.idSousCategorie.idCategorie.nomCategorie }} · {{ d.idSousCategorie.nomSousCategorie }}
+                            {% elseif d.idSousCategorie %}
+                                {{ d.idSousCategorie.nomSousCategorie }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
                         <td>
                             <span class="badge bg-{{ d.disponible ? 'success' : 'secondary' }}">
                                 {{ d.disponible ? 'Disponible' : 'Indisponible' }}
                             </span>
+                            {% if d.bientotDisponible %}
+                                <span class="badge bg-warning text-dark">Bientôt disponible</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline-primary js-open-copy-modal"
+                                data-copy-id="{{ d.idDoc }}"
+                                data-doc-title="{{ d.titre|e('html_attr') }}"
+                            >
+                                Nouvel exemplaire
+                            </button>
                         </td>
                     </tr>
                 {% else %}
                     <tr>
-                        <td colspan="5" class="text-muted text-center py-4">Aucun document</td>
+                        <td colspan="6" class="text-muted text-center py-4">Aucun document</td>
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -50,4 +72,53 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="copyExemplaireModal" tabindex="-1" aria-labelledby="copyExemplaireModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="copyExemplaireForm" method="get" action="{{ path('admin_documents_new') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="copyExemplaireModalLabel">Créer des exemplaires</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-2">Document source:</p>
+                    <p class="fw-semibold" id="copyExemplaireTitle"></p>
+                    <input type="hidden" name="copy_of" id="copyExemplaireId" value="">
+                    <label for="copyExemplaireCount" class="form-label mt-2">Nombre de nouveaux exemplaires</label>
+                    <input id="copyExemplaireCount" name="copies" type="number" class="form-control" min="1" max="100" value="1" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Continuer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        (() => {
+            const modalEl = document.getElementById('copyExemplaireModal');
+            const formIdEl = document.getElementById('copyExemplaireId');
+            const titleEl = document.getElementById('copyExemplaireTitle');
+            const countEl = document.getElementById('copyExemplaireCount');
+            if (!modalEl || !formIdEl || !titleEl || !countEl || typeof bootstrap === 'undefined') {
+                return;
+            }
+
+            const modal = new bootstrap.Modal(modalEl);
+            document.querySelectorAll('.js-open-copy-modal').forEach((button) => {
+                button.addEventListener('click', () => {
+                    formIdEl.value = button.getAttribute('data-copy-id') || '';
+                    titleEl.textContent = button.getAttribute('data-doc-title') || '';
+                    countEl.value = '1';
+                    modal.show();
+                });
+            });
+        })();
+    </script>
 {% endblock %}

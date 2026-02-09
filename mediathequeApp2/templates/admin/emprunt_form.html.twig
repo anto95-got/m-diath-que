@@ -21,16 +21,7 @@
                             {{ form_errors(form.codeBarres) }}
                             <div id="doc-preview" class="small mt-2 text-muted"></div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Date retour prévue</label>
-                            {{ form_widget(form.dateRetourPrevue, {'attr': {'class': 'form-control'}}) }}
-                            {{ form_errors(form.dateRetourPrevue) }}
-                        </div>
-                        <div class="form-check mb-3">
-                            {{ form_widget(form.prolonge, {'attr': {'class': 'form-check-input'}}) }}
-                            <label class="form-check-label" for="{{ form.prolonge.vars.id }}">Prolongé ?</label>
-                            {{ form_errors(form.prolonge) }}
-                        </div>
+                        <p class="small text-muted">La date d'emprunt est automatiquement fixée à aujourd'hui.</p>
                         <div class="d-flex justify-content-between">
                             <a class="btn btn-outline-secondary" href="{{ path('admin_emprunts') }}">Annuler</a>
                             <button class="btn btn-primary" type="submit">Enregistrer</button>
@@ -49,7 +40,6 @@
         const initEmpruntLookup = () => {
             const input = document.querySelector('[name="emprunt[codeBarres]"]');
             const preview = document.getElementById('doc-preview');
-            const dateRetour = document.querySelector('[name="emprunt[dateRetourPrevue]"]');
 
             if (input && preview) {
                 const lookup = (code) => {
@@ -79,34 +69,6 @@
                 if (input.value) {
                     lookup(input.value.trim());
                 }
-            }
-            // Limite retour max 3 mois
-            if (dateRetour) {
-                const today = new Date();
-                const max = new Date();
-                max.setMonth(max.getMonth() + 3);
-                const toISO = (d) => d.toISOString().slice(0,10);
-                dateRetour.setAttribute('min', toISO(today));
-                dateRetour.setAttribute('max', toISO(max));
-                const msg = document.createElement('div');
-                msg.className = 'small mt-1 text-muted';
-                dateRetour.parentNode.appendChild(msg);
-                // Si la valeur dépasse, on la ramène
-                dateRetour.addEventListener('change', (e) => {
-                    const val = new Date(e.target.value);
-                    if (val > max) {
-                        e.target.value = toISO(max);
-                        msg.textContent = 'Date ajustée : dépasse le maximum (3 mois).';
-                        msg.className = 'small mt-1 text-warning';
-                    } else if (val < today) {
-                        e.target.value = toISO(today);
-                        msg.textContent = 'Date ajustée : pas de date antérieure à aujourd’hui.';
-                        msg.className = 'small mt-1 text-danger';
-                    } else {
-                        msg.textContent = '';
-                        msg.className = 'small mt-1 text-muted';
-                    }
-                });
             }
         };
         document.addEventListener('DOMContentLoaded', initEmpruntLookup);

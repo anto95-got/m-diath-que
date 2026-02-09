@@ -5,10 +5,11 @@
 {% block content %}
 <div class="container py-5">
     <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
-        <h1 class="h3 mb-0">Emprunts</h1>
+        <h1 class="h3 mb-0">Retours et historique des emprunts</h1>
         <a class="btn btn-primary" href="{{ path('admin_emprunts_new') }}"><i class="bi bi-plus"></i> Nouvel emprunt</a>
     </div>
 
+    <h2 class="h5 mb-3">Emprunts en cours</h2>
     <div class="card shadow-sm">
         <div class="table-responsive">
             <table class="table align-middle mb-0">
@@ -17,14 +18,14 @@
                         <th>#</th>
                         <th>Document</th>
                         <th>Utilisateur</th>
-                        <th>Emprunt</th>
+                        <th>Date emprunt</th>
                         <th>Retour prévu</th>
-                        <th>Retour réel</th>
+                        <th>Statut</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                {% for e in emprunts %}
+                {% for e in open_loans %}
                     <tr>
                         <td>{{ e.idEmprunt }}</td>
                         <td>{{ e.idDoc ? e.idDoc.titre : '-' }}</td>
@@ -32,23 +33,75 @@
                         <td>{{ e.dateEmprunt ? e.dateEmprunt|date('d/m/Y') : '-' }}</td>
                         <td>{{ e.dateRetourPrevue ? e.dateRetourPrevue|date('d/m/Y') : '-' }}</td>
                         <td>
-                            {% if e.dateRetourReelle %}
-                                {{ e.dateRetourReelle|date('d/m/Y') }}
+                            {% if e.statut == 'reserve' %}
+                                <span class="badge bg-info text-dark">Réservé</span>
                             {% else %}
                                 <span class="badge bg-warning text-dark">En cours</span>
                             {% endif %}
                         </td>
                         <td class="text-end">
-                            {% if not e.dateRetourReelle %}
-                                <form method="post" action="{{ path('admin_emprunts_return', {id: e.idEmprunt}) }}">
-                                    <button class="btn btn-sm btn-success">Clôturer</button>
+                            {% if e.statut == 'en_cours' %}
+                                <form method="post" action="{{ path('admin_emprunts_return', {id: e.idEmprunt}) }}" class="d-flex justify-content-end align-items-center gap-2">
+                                    <select name="etat_retour" class="form-select form-select-sm" required>
+                                        <option value="">État</option>
+                                        <option value="bon">Bon état</option>
+                                        <option value="abime">Abîmé</option>
+                                    </select>
+                                    <input type="text" name="commentaire_retour" class="form-control form-control-sm" maxlength="255" placeholder="Commentaire (optionnel)">
+                                    <button class="btn btn-sm btn-success" onclick="return confirm('Confirmer le retour de ce document ?');">Confirmer retour</button>
                                 </form>
+                            {% elseif e.statut == 'reserve' %}
+                                <span class="text-muted small">Attente de confirmation d'emprunt</span>
                             {% endif %}
                         </td>
                     </tr>
                 {% else %}
                     <tr>
                         <td colspan="7" class="text-muted text-center py-4">Aucun emprunt</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <h2 class="h5 mt-5 mb-3">Historique des emprunts</h2>
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Document</th>
+                        <th>Utilisateur</th>
+                        <th>Date emprunt</th>
+                        <th>Retour réel</th>
+                        <th>État retour</th>
+                        <th>Commentaire</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for e in history_loans %}
+                    <tr>
+                        <td>{{ e.idEmprunt }}</td>
+                        <td>{{ e.idDoc ? e.idDoc.titre : '-' }}</td>
+                        <td>{{ e.matricule ? e.matricule.email : '-' }}</td>
+                        <td>{{ e.dateEmprunt ? e.dateEmprunt|date('d/m/Y') : '-' }}</td>
+                        <td>{{ e.dateRetourEffectif ? e.dateRetourEffectif|date('d/m/Y') : '-' }}</td>
+                        <td>
+                            {% if e.etatRetour == 'bon' %}
+                                <span class="badge bg-success">Bon état</span>
+                            {% elseif e.etatRetour == 'abime' %}
+                                <span class="badge bg-danger">Abîmé</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ e.commentaireRetour ?: '-' }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-muted text-center py-4">Aucun historique</td>
                     </tr>
                 {% endfor %}
                 </tbody>

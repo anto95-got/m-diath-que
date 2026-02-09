@@ -1,41 +1,49 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Utilisateur index{% endblock %}
+{% block title %}Utilisateurs{% endblock %}
 
-{% block body %}
-    <h1>Utilisateur index</h1>
+{% block content %}
+<div class="container py-5">
+    <h1 class="h4 mb-4">Gestion des utilisateurs</h1>
 
     <table class="table">
         <thead>
             <tr>
-                <th>Matricule</th>
+                <th>ID</th>
                 <th>Nom</th>
                 <th>Prenom</th>
                 <th>Email</th>
-                <th>Password</th>
-                <th>actions</th>
+                <th>Rôle</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
         {% for utilisateur in utilisateurs %}
             <tr>
-                <td>{{ utilisateur.matricule }}</td>
+                <td>{{ utilisateur.idUtilisateur }}</td>
                 <td>{{ utilisateur.nom }}</td>
                 <td>{{ utilisateur.prenom }}</td>
                 <td>{{ utilisateur.email }}</td>
-                <td>{{ utilisateur.password }}</td>
+                <td>{{ utilisateur.idRole ? utilisateur.idRole.nomRole : '-' }}</td>
                 <td>
-                    <a href="{{ path('app_user_show', {'matricule': utilisateur.matricule}) }}">show</a>
-                    <a href="{{ path('app_user_edit', {'matricule': utilisateur.matricule}) }}">edit</a>
+                    <a class="btn btn-sm btn-outline-primary" href="{{ path('app_user_show', {'idUtilisateur': utilisateur.idUtilisateur}) }}">Profil</a>
+                    <a class="btn btn-sm btn-outline-secondary" href="{{ path('app_user_edit', {'idUtilisateur': utilisateur.idUtilisateur}) }}">Modifier</a>
+                    {% if is_granted('ROLE_ADMIN') and not utilisateur.isAdmin and not utilisateur.isSuperAdmin %}
+                        <form method="post" action="{{ path('app_user_promote_admin', {'idUtilisateur': utilisateur.idUtilisateur}) }}" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('promote_admin' ~ utilisateur.idUtilisateur) }}">
+                            <button class="btn btn-sm btn-link align-baseline">Promouvoir admin</button>
+                        </form>
+                    {% endif %}
                 </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="6">no records found</td>
+                <td colspan="6">Aucun utilisateur trouvé</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
 
-    <a href="{{ path('app_user_new') }}">Create new</a>
+    <a class="btn btn-primary" href="{{ path('app_user_new') }}">Créer utilisateur</a>
+</div>
 {% endblock %}

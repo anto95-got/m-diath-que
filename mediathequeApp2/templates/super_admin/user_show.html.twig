@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Super Admin - Profil{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h1 class="h4 mb-4">Profil utilisateur (lecture seule)</h1>
+                    <table class="table">
+                        <tbody>
+                            <tr><th>ID</th><td>{{ user.idUtilisateur }}</td></tr>
+                            <tr><th>Nom</th><td>{{ user.nom }}</td></tr>
+                            <tr><th>Prénom</th><td>{{ user.prenom }}</td></tr>
+                            <tr><th>Email</th><td>{{ user.email }}</td></tr>
+                            <tr><th>Rôle</th><td>{{ user.idRole ? user.idRole.nomRole : '-' }}</td></tr>
+                            <tr><th>Actif</th><td>{{ user.actif ? 'Oui' : 'Non' }}</td></tr>
+                            <tr><th>Date inscription</th><td>{{ user.dateInscription ? user.dateInscription|date('d/m/Y H:i') : '-' }}</td></tr>
+                        </tbody>
+                    </table>
+                    <a class="btn btn-outline-secondary" href="{{ path('super_admin_users') }}">Retour liste</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

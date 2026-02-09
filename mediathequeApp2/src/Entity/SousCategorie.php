@@ -8,9 +8,8 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SousCategorieRepository::class)]
-#[ORM\Table(name: 'sous_categorie', uniqueConstraints: [
-    new ORM\UniqueConstraint(name: 'uq_sous_categorie', columns: ['nom_sous_categorie', 'id_categorie'])
-])]
+#[ORM\Table(name: 'sous_categorie')]
+#[ORM\UniqueConstraint(name: 'uq_sous_categorie', columns: ['nom_sous_categorie', 'id_categorie'])]
 class SousCategorie
 {
     #[ORM\Id]

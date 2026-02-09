@@ -26,6 +26,12 @@ class Emprunt
     #[ORM\Column(name: 'statut', length: 50, options: ['default' => 'en_cours'])]
     private ?string $statut = 'en_cours';
 
+    #[ORM\Column(name: 'etat_retour', length: 30, nullable: true)]
+    private ?string $etatRetour = null;
+
+    #[ORM\Column(name: 'commentaire_retour', type: 'text', nullable: true)]
+    private ?string $commentaireRetour = null;
+
     #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: 'emprunts')]
     #[ORM\JoinColumn(name: 'id_utilisateur', referencedColumnName: 'id_utilisateur', nullable: false)]
     private ?Utilisateur $idUtilisateur = null;
@@ -86,6 +92,28 @@ class Emprunt
     public function setStatut(string $statut): static
     {
         $this->statut = $statut;
+        return $this;
+    }
+
+    public function getEtatRetour(): ?string
+    {
+        return $this->etatRetour;
+    }
+
+    public function setEtatRetour(?string $etatRetour): static
+    {
+        $this->etatRetour = $etatRetour;
+        return $this;
+    }
+
+    public function getCommentaireRetour(): ?string
+    {
+        return $this->commentaireRetour;
+    }
+
+    public function setCommentaireRetour(?string $commentaireRetour): static
+    {
+        $this->commentaireRetour = $commentaireRetour;
         return $this;
     }
 
